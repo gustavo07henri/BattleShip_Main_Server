@@ -1,17 +1,13 @@
 package com.shg.battleship_main_server.domain;
 
-import lombok.Getter;
-
-import java.util.Objects;
-
-public record Cordinate(int row, int col) {
-    public Cordinate{
+public record Coordinate(int row, int col) {
+    public Coordinate {
         if(row < 0 || row >= 10 || col < 0 || col >= 10){
             throw new IllegalArgumentException("Coordenada fora dos limites do tabuleiro (10x10).");
         }
     }
 
-    public static Cordinate fromString(String coord){
+    public static Coordinate fromString(String coord){
         if(coord == null || coord.length() < 2 || coord.length() > 3){
             throw new IllegalArgumentException("Formato de coordenada inválido (esperado A1 - J10)");
         }
@@ -25,7 +21,7 @@ public record Cordinate(int row, int col) {
         }catch (NumberFormatException ex){
             throw  new IllegalArgumentException("Número da coordenada inválido.");
         }
-        return new Cordinate(col, row);
+        return new Coordinate(col, row);
     }
 
     @Override

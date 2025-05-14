@@ -19,13 +19,13 @@ import java.util.UUID;
 public class Play {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     private PlayResult result;
 
     @Convert(converter = CordinateConverter.class)
-    private Cordinate cordinate;
+    private Coordinate coordinate;
     private Timestamp moment;
 
 

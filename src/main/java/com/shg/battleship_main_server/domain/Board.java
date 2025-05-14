@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Board {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Transient
@@ -38,7 +38,7 @@ public class Board {
     @Convert(converter = CordinateConverter.class)
     @CollectionTable(name = "tb_cordinates", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "ataques_recebidos")
-    private List<Cordinate> attacksReceived;
+    private List<Coordinate> attacksReceived;
 
     @ManyToOne
     @JoinColumn(name = "jogador_id")

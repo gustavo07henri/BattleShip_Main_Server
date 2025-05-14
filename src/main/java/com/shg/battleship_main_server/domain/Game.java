@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Game {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     private GameStatus gameStatus;
@@ -36,10 +36,13 @@ public class Game {
     @JoinColumn(name = "player_2_id")
     private Player player2;
 
-
     @ManyToOne
     @JoinColumn(name = "vencedor_id")
     private Player winner;
+
+    @ManyToOne
+    @JoinColumn(name = "jogador_atual_id")
+    private Player currentPlayer;
 
     @OneToMany
     @JoinColumn(name = "tabuleiros_id")

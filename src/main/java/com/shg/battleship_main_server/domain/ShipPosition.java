@@ -17,11 +17,11 @@ import java.util.UUID;
 public class ShipPosition {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Convert(converter = CordinateConverter.class)
-    private Cordinate position;
+    private Coordinate position;
 
     @ManyToOne
     @JoinColumn(name = "navio_id")

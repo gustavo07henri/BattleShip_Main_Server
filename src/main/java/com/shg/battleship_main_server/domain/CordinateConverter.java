@@ -4,15 +4,15 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public class CordinateConverter implements AttributeConverter<Cordinate, String> {
+public class CordinateConverter implements AttributeConverter<Coordinate, String> {
 
     @Override
-    public String convertToDatabaseColumn(Cordinate cordinate) {
-        return cordinate.toString();
+    public String convertToDatabaseColumn(Coordinate coordinate) {
+        return coordinate.toString();
     }
 
     @Override
-    public Cordinate convertToEntityAttribute(String s) {
-        return Cordinate.fromString(s);
+    public Coordinate convertToEntityAttribute(String s) {
+        return Coordinate.fromString(s);
     }
 }

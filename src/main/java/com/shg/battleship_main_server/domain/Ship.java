@@ -1,5 +1,6 @@
 package com.shg.battleship_main_server.domain;
 
+import com.shg.battleship_main_server.domain.enums.ShipState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,12 +17,12 @@ import java.util.UUID;
 @Table(name = "tb_navio")
 public class Ship {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     private int size;
     private int hits;
-    private boolean state;
+    private ShipState state;
 
 
     @ManyToOne
