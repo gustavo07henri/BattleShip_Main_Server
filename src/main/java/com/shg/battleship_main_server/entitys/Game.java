@@ -1,6 +1,6 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.entitys;
 
-import com.shg.battleship_main_server.domain.enums.GameStatus;
+import com.shg.battleship_main_server.enums.GameStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +23,7 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private GameStatus gameStatus;
     private Timestamp start;
     private Timestamp finish;
@@ -44,8 +45,7 @@ public class Game {
     @JoinColumn(name = "jogador_atual_id")
     private Player currentPlayer;
 
-    @OneToMany
-    @JoinColumn(name = "tabuleiros_id")
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<Board> boards;
 
 }

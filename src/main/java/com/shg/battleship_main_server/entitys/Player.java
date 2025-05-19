@@ -1,4 +1,4 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.entitys;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

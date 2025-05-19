@@ -1,4 +1,4 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.dtos;
 
 public record Coordinate(int row, int col) {
     public Coordinate {

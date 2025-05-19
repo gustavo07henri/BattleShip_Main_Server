@@ -1,11 +1,13 @@
-package com.shg.battleship_main_server.gameCore;
+package com.shg.battleship_main_server.services;
 
-import com.shg.battleship_main_server.domain.*;
-import com.shg.battleship_main_server.domain.dtos.PlayDto;
-import com.shg.battleship_main_server.domain.dtos.RequestShipDto;
-import com.shg.battleship_main_server.domain.enums.GameStatus;
-import com.shg.battleship_main_server.domain.enums.PlayResult;
-import com.shg.battleship_main_server.domain.enums.ShipState;
+import com.shg.battleship_main_server.entitys.*;
+import com.shg.battleship_main_server.dtos.Coordinate;
+import com.shg.battleship_main_server.dtos.PlayDto;
+import com.shg.battleship_main_server.dtos.PlayResponseDto;
+import com.shg.battleship_main_server.dtos.RequestShipDto;
+import com.shg.battleship_main_server.enums.GameStatus;
+import com.shg.battleship_main_server.enums.PlayResult;
+import com.shg.battleship_main_server.enums.ShipState;
 import com.shg.battleship_main_server.repositorys.BoardRepository;
 import com.shg.battleship_main_server.repositorys.GameRepository;
 import com.shg.battleship_main_server.repositorys.PlayRepository;
@@ -29,27 +31,50 @@ public class  GameService{
     private final PlayerRepository playerRepository;
     private final PlayRepository playRepository;
 
-    public Game SetGame(UUID player1Id, UUID player2Id){
-        if(player1Id.equals(player2Id)){
-            throw new IllegalArgumentException("Os jogadores devem ser diferentes");
-        }
-        Player p1 = playerRepository.findById(player1Id)
-                .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
-        Player p2 = playerRepository.findById(player2Id)
+    public Game setGame(UUID playerId){
+        Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
 
-        if(gameRepository.existsByPlayer1OrPlayer2AndGameStatus(p1, p2, GameStatus.IN_PROGRESS)){
-            return gameRepository.findByPlayer1OrPlayer2AndGameStatus(p1, p2, GameStatus.IN_PROGRESS);
+        if (gameRepository.existsByPlayer1OrPlayer2AndGameStatus(player, player, GameStatus.WAITING) ||
+                gameRepository.existsByPlayer1OrPlayer2AndGameStatus(player, player, GameStatus.IN_PROGRESS)) {
+            throw new IllegalStateException("Jogador já está em um jogo ativo");
         }
+
+        Game game = gameRepository.findByGameStatus(GameStatus.WAITING);
+        if (game != null && !game.getPlayer1().equals(player)) {
+            return joinGame(game.getId(), playerId);
+        }
+
+
         long timestamp = Instant.now().getEpochSecond();
 
         Game newGame = new Game();
-        newGame.setGameStatus(GameStatus.IN_PROGRESS);
+        newGame.setGameStatus(GameStatus.WAITING);
         newGame.setStart(new Timestamp(timestamp));
-        newGame.setPlayer1(p1);
-        newGame.setPlayer2(p2);
-        newGame.setCurrentPlayer(p1);
+        newGame.setPlayer1(player);
+        newGame.setCurrentPlayer(player);
         return gameRepository.save(newGame);
+    }
+
+    public Game joinGame(UUID gameId, UUID playerId){
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
+        Player p = playerRepository.findById(playerId)
+                .orElseThrow(() -> new EntityNotFoundException("Jogador 2 não encontrado"));
+
+        if (game.getPlayer1().equals(p)){
+            throw new IllegalArgumentException("Os jogadores devem ser diferentes");
+        }
+        if(game.getGameStatus() != GameStatus.WAITING){
+            throw new IllegalStateException("Jogo não está aguardando jogadores");
+        }
+        if(gameRepository.existsByPlayer1OrPlayer2AndGameStatus(p, p, GameStatus.IN_PROGRESS)){
+            throw new IllegalStateException("Jogador já está em um jogo ativo");
+        }
+
+        game.setPlayer2(p);
+        game.setGameStatus(GameStatus.IN_PROGRESS);
+        return gameRepository.save(game);
     }
 
     public Board setBoard(List<RequestShipDto> data, UUID gameId, UUID playerId){
@@ -60,6 +85,9 @@ public class  GameService{
 
         if(!player.equals(game.getPlayer1()) && !player.equals(game.getPlayer2())){
             throw new IllegalStateException("Jogador não pertence a partida");
+        }
+        if(game.getBoards().size() >= 2 || boardRepository.existsByGameIdAndPlayerId(game.getId(), player.getId())){
+            throw new IllegalArgumentException("não se pode associar mais tabuleiros a esse jogo");
         }
         validateShips(data);
 
@@ -75,14 +103,17 @@ public class  GameService{
             newShip.setState(ShipState.AFLOAT);
             newShip.setSize(dto.coordinates().size());
             newShip.setHits(0);
+            newShip.setPositions(new ArrayList<>());
             ships.add(newShip);
 
             for(Coordinate c : dto.coordinates()){
                 ShipPosition sp = new ShipPosition();
                 sp.setPosition(c);
                 sp.setShip(newShip);
-                shipPositions.add(sp);
+
+                newShip.getPositions().add(sp);
             }
+
         }
 
 
@@ -96,6 +127,7 @@ public class  GameService{
     public void validateShips(List<RequestShipDto> data){
         int[] allowedShipSizes = {5,4,3,3,2,2,2,1};
         int maxShips = allowedShipSizes.length;
+        System.out.println(data);
 
         if(data.size() > maxShips || data.isEmpty()){
             throw new IllegalArgumentException("Quantidade de navios deve ser entre 1 e " + maxShips);
@@ -149,13 +181,17 @@ public class  GameService{
     }
 
     @Transactional
-    public PlayResult setPlay(PlayDto data, UUID boardId){
-        var board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new EntityNotFoundException("Tabuleriro não encontrado"));
+    public PlayResponseDto setPlay(PlayDto data){
+        var game = gameRepository.findById(data.gameId())
+                .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
         var player = playerRepository.findById(data.player())
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
-        Game game = board.getGame();
+        Board board = game.getBoards().stream()
+                .filter(b -> b.getPlayer() != player)
+                .findFirst()
+                .orElse(null);
+
 
         if(game.getGameStatus() != GameStatus.IN_PROGRESS){
             throw new IllegalStateException("O jogo não esta em andamento");
@@ -194,15 +230,16 @@ public class  GameService{
         boardRepository.save(board);
         playRepository.save(play);
 
-        if(checkGame(boardId) == GameStatus.FINISHED){
+        if(checkGame(board.getId()) == GameStatus.FINISHED){
             defineWinner(board, player);
             gameRepository.save(game);
+//            seria bom retornar algum valor para definir que o jogo acabou
         }else{
             game.setCurrentPlayer(player.equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1());
             gameRepository.save(game);
         }
 
-        return play.getResult();
+        return new PlayResponseDto(play.getResult(), play.getCoordinate(), play.getPlayer().getId(), play.getGame().getId());
     }
 
     public GameStatus checkGame(UUID boardId){

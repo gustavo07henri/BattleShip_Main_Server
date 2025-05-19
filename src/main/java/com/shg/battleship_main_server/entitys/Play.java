@@ -1,6 +1,8 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.entitys;
 
-import com.shg.battleship_main_server.domain.enums.PlayResult;
+import com.shg.battleship_main_server.dtos.Coordinate;
+import com.shg.battleship_main_server.enums.PlayResult;
+import com.shg.battleship_main_server.utils.CoordinateConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,9 +24,10 @@ public class Play {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     private PlayResult result;
 
-    @Convert(converter = CordinateConverter.class)
+    @Convert(converter = CoordinateConverter.class)
     private Coordinate coordinate;
     private Timestamp moment;
 

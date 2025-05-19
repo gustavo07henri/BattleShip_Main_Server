@@ -1,6 +1,9 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.entitys;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shg.battleship_main_server.dtos.Coordinate;
+import com.shg.battleship_main_server.utils.CoordinateConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,14 +31,15 @@ public class Board {
     private final int width = 10;
     private boolean isVisible = false;
 
-    @OneToMany
+    @JsonIgnore
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ship> ships;
 
     @OneToMany
     private List<ShipPosition> shipPositions;
 
     @ElementCollection
-    @Convert(converter = CordinateConverter.class)
+    @Convert(converter = CoordinateConverter.class)
     @CollectionTable(name = "tb_cordinates", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "ataques_recebidos")
     private List<Coordinate> attacksReceived;

@@ -1,10 +1,11 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.utils;
 
+import com.shg.battleship_main_server.dtos.Coordinate;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public class CordinateConverter implements AttributeConverter<Coordinate, String> {
+public class CoordinateConverter implements AttributeConverter<Coordinate, String> {
 
     @Override
     public String convertToDatabaseColumn(Coordinate coordinate) {

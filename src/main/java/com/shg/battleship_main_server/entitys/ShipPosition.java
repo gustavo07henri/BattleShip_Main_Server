@@ -1,5 +1,7 @@
-package com.shg.battleship_main_server.domain;
+package com.shg.battleship_main_server.entitys;
 
+import com.shg.battleship_main_server.dtos.Coordinate;
+import com.shg.battleship_main_server.utils.CoordinateConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +22,7 @@ public class ShipPosition {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Convert(converter = CordinateConverter.class)
+    @Convert(converter = CoordinateConverter.class)
     private Coordinate position;
 
     @ManyToOne

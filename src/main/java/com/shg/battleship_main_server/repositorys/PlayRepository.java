@@ -1,7 +1,6 @@
 package com.shg.battleship_main_server.repositorys;
 
-import com.shg.battleship_main_server.domain.Board;
-import com.shg.battleship_main_server.domain.Play;
+import com.shg.battleship_main_server.entitys.Play;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
