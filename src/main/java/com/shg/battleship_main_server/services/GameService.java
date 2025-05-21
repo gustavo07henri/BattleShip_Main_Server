@@ -1,10 +1,7 @@
 package com.shg.battleship_main_server.services;
 
+import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
-import com.shg.battleship_main_server.dtos.Coordinate;
-import com.shg.battleship_main_server.dtos.PlayDto;
-import com.shg.battleship_main_server.dtos.PlayResponseDto;
-import com.shg.battleship_main_server.dtos.RequestShipDto;
 import com.shg.battleship_main_server.enums.GameStatus;
 import com.shg.battleship_main_server.enums.PlayResult;
 import com.shg.battleship_main_server.enums.ShipState;
@@ -77,7 +74,7 @@ public class  GameService{
         return gameRepository.save(game);
     }
 
-    public Board setBoard(List<RequestShipDto> data, UUID gameId, UUID playerId){
+    public BoardResponseDto setBoard(List<RequestShipDto> data, UUID gameId, UUID playerId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
         Player player = playerRepository.findById(playerId)
@@ -111,6 +108,7 @@ public class  GameService{
                 sp.setPosition(c);
                 sp.setShip(newShip);
 
+                shipPositions.add(sp);
                 newShip.getPositions().add(sp);
             }
 
@@ -121,7 +119,14 @@ public class  GameService{
         board.setShipPositions(shipPositions);
         board.setAttacksReceived(new ArrayList<>());
 
-        return boardRepository.save(board);
+        boardRepository.save(board);
+
+        return  new BoardResponseDto(
+                board.getPlayer().getId(),
+                board.getGame().getId(),
+                board.getShipPositions(),
+                board.getAttacksReceived()
+        );
 
     }
     public void validateShips(List<RequestShipDto> data){
@@ -181,7 +186,7 @@ public class  GameService{
     }
 
     @Transactional
-    public PlayResponseDto setPlay(PlayDto data){
+    public PlayResponseDto setPlay(PlayRequestDto data){
         var game = gameRepository.findById(data.gameId())
                 .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
         var player = playerRepository.findById(data.player())

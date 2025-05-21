@@ -1,5 +1,6 @@
 package com.shg.battleship_main_server.controllers;
 
+import com.shg.battleship_main_server.dtos.BoardResponseDto;
 import com.shg.battleship_main_server.entitys.Board;
 import com.shg.battleship_main_server.entitys.Game;
 import com.shg.battleship_main_server.dtos.BoardRequestDto;
@@ -26,9 +27,9 @@ public class RestGameController {
 
 
     @PostMapping("/create-board")
-    public ResponseEntity<Board> createBoard(@RequestBody BoardRequestDto data){
-        Board board = gameService.setBoard(data.shipDtos(), data.gameId(), data.playerId());
+    public ResponseEntity<BoardResponseDto> createBoard(@RequestBody BoardRequestDto data){
+        BoardResponseDto response = gameService.setBoard(data.shipDtos(), data.gameId(), data.playerId());
         System.out.println(data);
-        return ResponseEntity.status(HttpStatus.OK).body(board);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

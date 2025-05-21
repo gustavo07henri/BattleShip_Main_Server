@@ -1,6 +1,6 @@
 package com.shg.battleship_main_server.controllers;
 
-import com.shg.battleship_main_server.dtos.PlayDto;
+import com.shg.battleship_main_server.dtos.PlayRequestDto;
 import com.shg.battleship_main_server.dtos.PlayResponseDto;
 import com.shg.battleship_main_server.services.GameService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class GameSocketController {
 
     @MessageMapping("/new-play")
     @SendTo("/topics/play")
-    public PlayResponseDto newPlay(PlayDto data) {
+    public PlayResponseDto newPlay(PlayRequestDto data) {
         try {
             return gameService.setPlay(data);
         } catch (Exception e) {

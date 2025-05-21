@@ -1,5 +1,6 @@
 package com.shg.battleship_main_server.entitys;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.shg.battleship_main_server.dtos.Coordinate;
 import com.shg.battleship_main_server.utils.CoordinateConverter;
 import jakarta.persistence.*;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @Table(name = "tb_posicao_navio")
 public class ShipPosition {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -25,6 +27,7 @@ public class ShipPosition {
     @Convert(converter = CoordinateConverter.class)
     private Coordinate position;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "navio_id")
     private Ship ship;
