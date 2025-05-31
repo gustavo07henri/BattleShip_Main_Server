@@ -1,0 +1,14 @@
+// codigos de erro enviados para aplicação
+001: Jogo não encontradado
+002: Usuário não encontrado
+003: O jogo não esta em andamento
+004: Não é o turno desse jodador
+005; Não é possivel atacar o proprio tabuleiro
+
+Nomes das Exceções em Java/Spring Boot:
+
+001: Jogo não encontrado → GameNotFoundException
+002: Usuário não encontrado → UserNotFoundException
+003: O jogo não está em andamento → GameNotInProgressException
+004: Não é o turno desse jogador → NotPlayerTurnException
+005: Não é possível atacar o próprio tabuleiro → SelfAttackNotAllowedException

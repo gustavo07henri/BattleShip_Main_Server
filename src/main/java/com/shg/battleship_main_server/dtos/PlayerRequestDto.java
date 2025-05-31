@@ -1,4 +1,8 @@
 package com.shg.battleship_main_server.dtos;
 
-public record PlayerRequestDto(String name, String email) {
+import jakarta.validation.constraints.Email;
+
+public record PlayerRequestDto(
+        String name,
+        @Email(message = "Email deve ser válido") String email) {
 }

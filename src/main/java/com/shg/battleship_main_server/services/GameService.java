@@ -1,10 +1,12 @@
 package com.shg.battleship_main_server.services;
 
+import com.shg.battleship_main_server.controllers.GameSocketController;
 import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
 import com.shg.battleship_main_server.enums.PlayResult;
 import com.shg.battleship_main_server.enums.ShipState;
+import com.shg.battleship_main_server.exceptions.*;
 import com.shg.battleship_main_server.repositorys.BoardRepository;
 import com.shg.battleship_main_server.repositorys.GameRepository;
 import com.shg.battleship_main_server.repositorys.PlayRepository;
@@ -187,10 +189,11 @@ public class  GameService{
 
     @Transactional
     public PlayResponseDto setPlay(PlayRequestDto data){
+
         var game = gameRepository.findById(data.gameId())
-                .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Jogo não encontrado"));
         var player = playerRepository.findById(data.player())
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new GameNotFoundException("Usuário não encontrado"));
 
         Board board = game.getBoards().stream()
                 .filter(b -> b.getPlayer() != player)
@@ -199,16 +202,17 @@ public class  GameService{
 
 
         if(game.getGameStatus() != GameStatus.IN_PROGRESS){
-            throw new IllegalStateException("O jogo não esta em andamento");
+            throw new GameNotInProgressException("O jogo não esta em andamento");
         }
+        assert board != null;
         if(board.getAttacksReceived().contains(data.coordinate())){
-            throw new IllegalArgumentException("Cordenada já atacada");
+            throw new CoordinateAlreadyAttackedException("Coordenada já atacada");
         }
         if(!player.equals(game.getCurrentPlayer())){
-            throw new IllegalStateException("Não é o turno desse jogador");
+            throw new NotPlayerTurnException("Não é o turno desse jogador");
         }
         if(player.equals(board.getPlayer())){
-            throw new IllegalStateException("Não é possivel atacar o proprio tabuleiro");
+            throw new SelfAttackNotAllowedException("Não é possível atacar o próprio tabuleiro");
         }
 
         Play play = new Play();
@@ -238,7 +242,8 @@ public class  GameService{
         if(checkGame(board.getId()) == GameStatus.FINISHED){
             defineWinner(board, player);
             gameRepository.save(game);
-//            seria bom retornar algum valor para definir que o jogo acabou
+//          seria bom retornar algum valor para definir que o jogo acabou
+//          Usando messagin sendToUser talvez seja uma boa, por enquanto é uma idéia
         }else{
             game.setCurrentPlayer(player.equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1());
             gameRepository.save(game);

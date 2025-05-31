@@ -3,6 +3,7 @@ package com.shg.battleship_main_server.services;
 import com.shg.battleship_main_server.entitys.Player;
 import com.shg.battleship_main_server.dtos.PlayerRequestDto;
 import com.shg.battleship_main_server.dtos.PlayerResponseDto;
+import com.shg.battleship_main_server.exceptions.EmailAllreadyInUse;
 import com.shg.battleship_main_server.repositorys.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ public class PlayerService {
 
     public PlayerResponseDto create(PlayerRequestDto data){
         Player newPlayer = new Player();
-        System.out.println(data);
         if(data.name().isEmpty() || data.email().isEmpty()){
             throw new IllegalArgumentException("Os campos não podem estar vazios");
+        }
+        if(playerRepository.existsPlayerByEmail(data.email())){
+            throw new EmailAllreadyInUse("Este email já está em uso.");
         }
         newPlayer.setEmail(data.email());
         newPlayer.setName(data.name());
