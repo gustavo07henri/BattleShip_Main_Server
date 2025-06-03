@@ -1,6 +1,8 @@
 package com.shg.battleship_main_server.controllers;
 
 import com.shg.battleship_main_server.dtos.BoardResponseDto;
+import com.shg.battleship_main_server.dtos.GameRequestDto;
+import com.shg.battleship_main_server.dtos.GameResponseDto;
 import com.shg.battleship_main_server.entitys.Board;
 import com.shg.battleship_main_server.entitys.Game;
 import com.shg.battleship_main_server.dtos.BoardRequestDto;
@@ -20,9 +22,9 @@ public class RestGameController {
     private final GameService gameService;
 
     @PostMapping("/search-game")
-    public ResponseEntity<UUID> createGame(@RequestBody UUID playerId){
-        Game game = gameService.setGame(playerId);
-        return ResponseEntity.status(game.getPlayer2() == null ? HttpStatus.OK : HttpStatus.CREATED).body(game.getId());
+    public ResponseEntity<GameResponseDto> createGame(@RequestBody GameRequestDto data){
+        Game game = gameService.setGame(data.playerId());
+        return ResponseEntity.status(game.getPlayer2() == null ? HttpStatus.OK : HttpStatus.CREATED).body(new GameResponseDto(game.getId()));
     }
 
 

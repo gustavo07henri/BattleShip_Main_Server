@@ -1,6 +1,6 @@
 package com.shg.battleship_main_server.services;
 
-import com.shg.battleship_main_server.controllers.GameSocketController;
+import com.shg.battleship_main_server.controllers.GameNotificationService;
 import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
@@ -29,6 +29,7 @@ public class  GameService{
     private final BoardRepository boardRepository;
     private final PlayerRepository playerRepository;
     private final PlayRepository playRepository;
+    private final GameNotificationService gameNotificationService;
 
     public Game setGame(UUID playerId){
         Player player = playerRepository.findById(playerId)
@@ -52,6 +53,8 @@ public class  GameService{
         newGame.setStart(new Timestamp(timestamp));
         newGame.setPlayer1(player);
         newGame.setCurrentPlayer(player);
+
+
         return gameRepository.save(newGame);
     }
 
@@ -73,6 +76,11 @@ public class  GameService{
 
         game.setPlayer2(p);
         game.setGameStatus(GameStatus.IN_PROGRESS);
+
+        // Notifica jogadores do início do jogo
+        gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), game.getId());
+        gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), game.getId());
+
         return gameRepository.save(game);
     }
 
@@ -132,7 +140,7 @@ public class  GameService{
 
     }
     public void validateShips(List<RequestShipDto> data){
-        int[] allowedShipSizes = {5,4,3,3,2,2,2,1};
+        int[] allowedShipSizes = {5,4,3,3,2};
         int maxShips = allowedShipSizes.length;
         System.out.println(data);
 
@@ -249,7 +257,20 @@ public class  GameService{
             gameRepository.save(game);
         }
 
-        return new PlayResponseDto(play.getResult(), play.getCoordinate(), play.getPlayer().getId(), play.getGame().getId());
+        UUID target = null;
+        if(play.getPlayer().getId().equals(play.getGame().getPlayer1().getId())){
+            target = play.getGame().getPlayer2().getId();
+        }
+        if(play.getPlayer().getId().equals(play.getGame().getPlayer2().getId())){
+            target = play.getGame().getPlayer1().getId();
+        }
+
+        return new PlayResponseDto(
+                play.getResult(),
+                play.getCoordinate(),
+                play.getPlayer().getId(),
+                play.getGame().getId(),
+                target);
     }
 
     public GameStatus checkGame(UUID boardId){

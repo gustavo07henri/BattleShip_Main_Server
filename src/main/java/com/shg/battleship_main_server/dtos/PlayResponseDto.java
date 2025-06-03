@@ -8,4 +8,5 @@ public record PlayResponseDto(
         PlayResult result,
         Coordinate coordinate,
         UUID gameId,
-        UUID playerId) {}
+        UUID playerId,
+        UUID target) {}
