@@ -4,6 +4,7 @@ import com.shg.battleship_main_server.controllers.GameNotificationService;
 import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
+import com.shg.battleship_main_server.enums.Notification;
 import com.shg.battleship_main_server.enums.PlayResult;
 import com.shg.battleship_main_server.enums.ShipState;
 import com.shg.battleship_main_server.exceptions.*;
@@ -81,6 +82,9 @@ public class  GameService{
         // Notifica jogadores do início do jogo
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), game.getId());
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), game.getId());
+
+        gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(), Notification.YOUR_TURN);
+        gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(), Notification.NOT_YOU_TURN);
 
         return gameRepository.save(game);
     }
@@ -250,22 +254,19 @@ public class  GameService{
         boardRepository.save(board);
         playRepository.save(play);
 
+        Player opponent = player.equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1();
+
         if(checkGame(board.getId()) == GameStatus.FINISHED){
             defineWinner(board, player);
             gameRepository.save(game);
-//          seria bom retornar algum valor para definir que o jogo acabou
-//          Usando messagin sendToUser talvez seja uma boa, por enquanto é uma idéia
-        }else{
-            game.setCurrentPlayer(player.equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1());
-            gameRepository.save(game);
-        }
 
-        UUID target = null;
-        if(play.getPlayer().getId().equals(play.getGame().getPlayer1().getId())){
-            target = play.getGame().getPlayer2().getId();
-        }
-        if(play.getPlayer().getId().equals(play.getGame().getPlayer2().getId())){
-            target = play.getGame().getPlayer1().getId();
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.WINNER);
+            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.LOSER);
+        }else{
+            game.setCurrentPlayer(opponent);
+            gameRepository.save(game);
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.NOT_YOU_TURN);
+            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.YOUR_TURN);
         }
 
         return new PlayResponseDto(
@@ -273,7 +274,7 @@ public class  GameService{
                 play.getCoordinate(),
                 play.getGame().getId(),
                 play.getPlayer().getId(),
-                target);
+                opponent.getId());
     }
 
     public GameStatus checkGame(UUID boardId){
