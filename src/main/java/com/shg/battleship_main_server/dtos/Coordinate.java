@@ -1,6 +1,6 @@
 package com.shg.battleship_main_server.dtos;
 
-public record Coordinate(int row, int col) {
+public record Coordinate( int col, int row) {
     public Coordinate {
         if(row < 0 || row >= 10 || col < 0 || col >= 10){
             throw new IllegalArgumentException("Coordenada fora dos limites do tabuleiro (10x10).");
