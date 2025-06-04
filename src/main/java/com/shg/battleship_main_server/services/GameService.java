@@ -59,6 +59,7 @@ public class  GameService{
     }
 
     public Game joinGame(UUID gameId, UUID playerId){
+        System.out.printf("Game id:  %s, player Id: %s ", gameId, playerId);
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
         Player p = playerRepository.findById(playerId)
@@ -105,6 +106,8 @@ public class  GameService{
         List<ShipPosition> shipPositions = new ArrayList<>();
 
         for(RequestShipDto dto : data){
+            System.out.println("dto: "+dto.toString());
+            System.out.println("coordinates: "+dto.coordinates().toString());
             Ship newShip = new Ship();
             newShip.setBoard(board);
             newShip.setState(ShipState.AFLOAT);
@@ -268,8 +271,8 @@ public class  GameService{
         return new PlayResponseDto(
                 play.getResult(),
                 play.getCoordinate(),
-                play.getPlayer().getId(),
                 play.getGame().getId(),
+                play.getPlayer().getId(),
                 target);
     }
 
@@ -290,5 +293,6 @@ public class  GameService{
         game.setGameStatus(GameStatus.FINISHED);
         gameRepository.save(game);
     }
+
 
 }
