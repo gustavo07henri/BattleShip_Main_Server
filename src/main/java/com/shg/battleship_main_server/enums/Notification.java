@@ -4,5 +4,9 @@ public enum Notification {
     WINNER,
     LOSER,
     YOUR_TURN,
-    NOT_YOU_TURN
+    NOT_YOU_TURN,
+    CANCELLED,
+    RESUMED,
+    WAITING_OTHER_PLAYER,
+
 }

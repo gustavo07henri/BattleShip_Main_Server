@@ -5,12 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.shg.battleship_main_server.dtos.Coordinate;
 import com.shg.battleship_main_server.utils.CoordinateConverter;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -18,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@ToString
 @Table(name = "tb_tabuleiro")
 public class Board {
 
@@ -36,13 +35,13 @@ public class Board {
     private List<Ship> ships;
 
     @OneToMany
-    private List<ShipPosition> shipPositions;
+    private Set<ShipPosition> shipPositions;
 
     @ElementCollection
     @Convert(converter = CoordinateConverter.class)
     @CollectionTable(name = "tb_cordinates", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "ataques_recebidos")
-    private List<Coordinate> attacksReceived;
+    private Set<Coordinate> attacksReceived;
 
     @ManyToOne
     @JoinColumn(name = "jogador_id")

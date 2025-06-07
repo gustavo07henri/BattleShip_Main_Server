@@ -1,13 +1,15 @@
-package com.shg.battleship_main_server.controllers;
+package com.shg.battleship_main_server.services;
 
-import com.shg.battleship_main_server.dtos.GameRequestDto;
+import com.shg.battleship_main_server.dtos.BoardRescueResponseDto;
 import com.shg.battleship_main_server.dtos.GameResponseDto;
 import com.shg.battleship_main_server.dtos.NotificationResponseDto;
+import com.shg.battleship_main_server.dtos.PlayResponseDto;
 import com.shg.battleship_main_server.enums.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -28,5 +30,10 @@ public class GameNotificationService {
 
     public void notifyInGameChanges(UUID playerId, Notification notification){
         messagingTemplate.convertAndSend("/topics/game-notify/" + playerId, new NotificationResponseDto(notification));
+    }
+
+    public void notifyRescueGame(UUID playerId, BoardRescueResponseDto response){
+        System.out.println(response);
+        messagingTemplate.convertAndSend("/topics/game-rescue/" + playerId, response);
     }
 }

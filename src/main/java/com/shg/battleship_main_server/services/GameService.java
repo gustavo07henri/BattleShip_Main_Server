@@ -1,6 +1,5 @@
 package com.shg.battleship_main_server.services;
 
-import com.shg.battleship_main_server.controllers.GameNotificationService;
 import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
@@ -36,10 +35,10 @@ public class  GameService{
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
 
-        if (gameRepository.existsByPlayer1OrPlayer2AndGameStatus(player, player, GameStatus.WAITING) ||
-                gameRepository.existsByPlayer1OrPlayer2AndGameStatus(player, player, GameStatus.IN_PROGRESS)) {
-            throw new IllegalStateException("Jogador já está em um jogo ativo");
+        if (gameRepository.isPlayerInActiveGame(player, List.of(GameStatus.WAITING, GameStatus.IN_PROGRESS))) {
+            throw new PlayerAlreadyInGameException("Jogador já está em um jogo ativo");
         }
+
 
         Game game = gameRepository.findByGameStatus(GameStatus.WAITING);
         if (game != null && !game.getPlayer1().equals(player)) {
@@ -72,7 +71,7 @@ public class  GameService{
         if(game.getGameStatus() != GameStatus.WAITING){
             throw new IllegalStateException("Jogo não está aguardando jogadores");
         }
-        if(gameRepository.existsByPlayer1OrPlayer2AndGameStatus(p, p, GameStatus.IN_PROGRESS)){
+        if(gameRepository.isPlayerInActiveGame(p, List.of(GameStatus.WAITING, GameStatus.IN_PROGRESS))){
             throw new IllegalStateException("Jogador já está em um jogo ativo");
         }
 
@@ -107,7 +106,7 @@ public class  GameService{
         board.setGame(game);
         board.setPlayer(player);
         List<Ship> ships = new ArrayList<>();
-        List<ShipPosition> shipPositions = new ArrayList<>();
+        Set<ShipPosition> shipPositions = new HashSet<>();
 
         for(RequestShipDto dto : data){
             System.out.println("dto: "+dto.toString());
@@ -134,7 +133,7 @@ public class  GameService{
 
         board.setShips(ships);
         board.setShipPositions(shipPositions);
-        board.setAttacksReceived(new ArrayList<>());
+        board.setAttacksReceived(new HashSet<>());
 
         boardRepository.save(board);
 

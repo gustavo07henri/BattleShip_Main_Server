@@ -45,7 +45,7 @@ public class Game {
     @JoinColumn(name = "jogador_atual_id")
     private Player currentPlayer;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards;
 
 }

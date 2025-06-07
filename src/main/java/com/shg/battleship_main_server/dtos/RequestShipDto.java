@@ -1,6 +1,5 @@
 package com.shg.battleship_main_server.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

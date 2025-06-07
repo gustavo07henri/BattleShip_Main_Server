@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    private final SimpMessagingTemplate messagingTemplate;
 
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -40,6 +37,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.IM_USED).body(ex.getMessage());
     }
 
+    @ExceptionHandler(PlayerAlreadyInGameException.class)
+    public ResponseEntity<String> PlayerAlreadyInGameHandle(PlayerAlreadyInGameException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 
     /**
      *
@@ -48,13 +49,13 @@ public class GlobalExceptionHandler {
      */
     @MessageExceptionHandler(GameNotFoundException.class)
     @SendToUser("/queue/errors")
-    public ErrorMessage handleGameNotFoundException(GameNotFoundException ex) {
+    public ErrorMessage handleGameNotFound(GameNotFoundException ex) {
         return new ErrorMessage(ex.getClass().getSimpleName(),ex.getMessage(), "GAME_NOT_FOUND");
     }
 
     @MessageExceptionHandler(UserNotFoundException.class)
     @SendToUser("/queue/errors")
-    public ErrorMessage handleUserNotFoundException(UserNotFoundException ex) {
+    public ErrorMessage handleUserNotFound(UserNotFoundException ex) {
         return new ErrorMessage(ex.getClass().getSimpleName(),ex.getMessage(), "USER_NOT_FOUND");
     }
 
@@ -65,9 +66,16 @@ public class GlobalExceptionHandler {
             CoordinateAlreadyAttackedException.class
     })
     @SendToUser("/queue/errors")
-    public ErrorMessage handleBadRequestExceptions(RuntimeException ex) {
+    public ErrorMessage handleBadRequest(RuntimeException ex) {
         return new ErrorMessage(ex.getClass().getSimpleName(),ex.getMessage(), "INVALID_REQUEST");
     }
+
+    @MessageExceptionHandler(RecoverySessionException.class)
+    @SendToUser("/queue/errors")
+    public ErrorMessage handleGRecoverySession(RecoverySessionException ex) {
+        return new ErrorMessage(ex.getClass().getSimpleName(),ex.getMessage(), "NOT_FOUND_OR_EXPIRED");
+    }
+
 
 
 }
