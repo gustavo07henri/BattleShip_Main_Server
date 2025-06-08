@@ -13,6 +13,7 @@ import com.shg.battleship_main_server.exceptions.GameNotFoundException;
 import com.shg.battleship_main_server.exceptions.RecoverySessionException;
 import com.shg.battleship_main_server.repositorys.BoardRepository;
 import com.shg.battleship_main_server.repositorys.GameRepository;
+import com.shg.battleship_main_server.repositorys.PlayRepository;
 import com.shg.battleship_main_server.repositorys.PlayerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,11 @@ public class GameRecoveryService {
     private final GameNotificationService gameNotificationService;
     private final GameRepository gameRepository;
     private final PlayerRepository playerRepository;
+    private final PlayRepository playRepository;
 
     private final Map<UUID, RecoverySession> recoverySessions = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
 
 
     //  Método para resgatar jogadas de um jogo em andamento
@@ -43,23 +46,31 @@ public class GameRecoveryService {
             Player opponent = player.equals(game.getPlayer1())? game.getPlayer2(): game.getPlayer1();
 
             Board board = boardRepository.findByGameAndPlayer(game, player);
+            List<Play> plays = playRepository.findByGame(game);
+
             if (board == null) {
              throw new EntityNotFoundException("Tabuleiro não encontrado para o jogador no jogo especificado");
             }
-
-            Hibernate.initialize(board.getAttacksReceived());
+            if (plays == null || plays.isEmpty()) {
+                throw new EntityNotFoundException("Esse jogo não possui jogadas ");
+            }
             Hibernate.initialize(board.getShipPositions());
             List<PlayResponseDto> playResponseDtos = new ArrayList<>();
+
+            for(Play play : plays){
+                if(play.getPlayer().getId().equals(player.getId())){
+                    PlayResponseDto dto = new PlayResponseDto(play.getResult(), play.getCoordinate(), game.getId(), player.getId(), opponent.getId());
+                    playResponseDtos.add(dto);
+                }
+                if(play.getPlayer().getId().equals(opponent.getId())){
+                    PlayResponseDto dto = new PlayResponseDto(play.getResult(), play.getCoordinate(), game.getId(), opponent.getId(), player.getId());
+                    playResponseDtos.add(dto);
+                }
+            }
 
             Set<Coordinate> shipPositionsSet = board.getShipPositions().stream()
                     .map(ShipPosition::getPosition)
                     .collect(Collectors.toSet());
-
-            for(Coordinate at : board.getAttacksReceived()){
-                PlayResult result = shipPositionsSet.contains(at) ? PlayResult.HIT : PlayResult.MISS;
-                PlayResponseDto dto = new PlayResponseDto(result, at, game.getId(), player.getId(), opponent.getId());
-                playResponseDtos.add(dto);
-            }
 
             gameNotificationService.notifyRescueGame(player.getId(), new BoardRescueResponseDto(playResponseDtos, shipPositionsSet));
 
