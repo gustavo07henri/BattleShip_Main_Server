@@ -29,6 +29,7 @@ public class GameNotificationService {
     }
 
     public void notifyInGameChanges(UUID playerId, Notification notification){
+        System.out.println(notification);
         messagingTemplate.convertAndSend("/topics/game-notify/" + playerId, new NotificationResponseDto(notification));
     }
 

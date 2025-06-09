@@ -1,9 +1,6 @@
 package com.shg.battleship_main_server.services;
 
-import com.shg.battleship_main_server.dtos.BoardRescueResponseDto;
-import com.shg.battleship_main_server.dtos.Coordinate;
-import com.shg.battleship_main_server.dtos.GameRescueRequestDto;
-import com.shg.battleship_main_server.dtos.PlayResponseDto;
+import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
 import com.shg.battleship_main_server.enums.Notification;
@@ -51,9 +48,6 @@ public class GameRecoveryService {
             if (board == null) {
              throw new EntityNotFoundException("Tabuleiro não encontrado para o jogador no jogo especificado");
             }
-            if (plays == null || plays.isEmpty()) {
-                throw new EntityNotFoundException("Esse jogo não possui jogadas ");
-            }
             Hibernate.initialize(board.getShipPositions());
             List<PlayResponseDto> playResponseDtos = new ArrayList<>();
 
@@ -94,6 +88,7 @@ public class GameRecoveryService {
 
         startRecovery(game.getId(), player.getId());
         confirmRecovery(game.getId(), player.getId(), confirm);
+
     }
 
     public synchronized void startRecovery(UUID gameId, UUID playerId){
@@ -124,13 +119,17 @@ public class GameRecoveryService {
 
         if (session.isBothConfirmed()) {
             recoverySessions.remove(gameId);
+
+            gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), gameId);
+            gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), gameId);
+
             gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(),Notification.RESUMED);
             gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(),Notification.RESUMED);
 
             executor.schedule(()->{
                 rescuePlaysGame(game, game.getPlayer1());
                 rescuePlaysGame(game, game.getPlayer2());
-            }, 5, TimeUnit.SECONDS);
+            }, 2, TimeUnit.SECONDS);
             return;
         }
 
@@ -141,7 +140,6 @@ public class GameRecoveryService {
         gameRepository.findById(gameId).ifPresent(game -> {
             game.setGameStatus(GameStatus.CANCELED);
             gameRepository.save(game);
-            gameRepository.delete(game);
             gameNotificationService.notifyInGameChanges(playerId, Notification.CANCELLED);
         });
     }
