@@ -120,11 +120,8 @@ public class GameRecoveryService {
         if (session.isBothConfirmed()) {
             recoverySessions.remove(gameId);
 
-            gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), gameId);
-            gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), gameId);
-
-            gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(),Notification.RESUMED);
-            gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(),Notification.RESUMED);
+            gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(),Notification.RESUMED, gameId);
+            gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(),Notification.RESUMED, gameId);
 
             executor.schedule(()->{
                 rescuePlaysGame(game, game.getPlayer1());
@@ -133,14 +130,14 @@ public class GameRecoveryService {
             return;
         }
 
-        gameNotificationService.notifyInGameChanges(playerId,Notification.WAITING_OTHER_PLAYER);
+        gameNotificationService.notifyInGameChanges(playerId,Notification.WAITING_OTHER_PLAYER, gameId);
     }
 
     private void cancelGame(UUID gameId, UUID playerId) {
         gameRepository.findById(gameId).ifPresent(game -> {
             game.setGameStatus(GameStatus.CANCELED);
             gameRepository.save(game);
-            gameNotificationService.notifyInGameChanges(playerId, Notification.CANCELLED);
+            gameNotificationService.notifyInGameChanges(playerId, Notification.CANCELLED, gameId);
         });
     }
 }

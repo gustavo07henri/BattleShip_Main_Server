@@ -82,8 +82,8 @@ public class  GameService{
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), game.getId());
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), game.getId());
 
-        gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(), Notification.YOUR_TURN);
-        gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(), Notification.NOT_YOU_TURN);
+        gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(), Notification.YOUR_TURN, gameId);
+        gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(), Notification.NOT_YOU_TURN, gameId);
 
         return gameRepository.save(game);
     }
@@ -259,13 +259,13 @@ public class  GameService{
             defineWinner(board, player);
             gameRepository.save(game);
 
-            gameNotificationService.notifyInGameChanges(player.getId(), Notification.WINNER);
-            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.LOSER);
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.WINNER, game.getId());
+            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.LOSER, game.getId());
         }else{
             game.setCurrentPlayer(opponent);
             gameRepository.save(game);
-            gameNotificationService.notifyInGameChanges(player.getId(), Notification.NOT_YOU_TURN);
-            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.YOUR_TURN);
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.NOT_YOU_TURN, game.getId());
+            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.YOUR_TURN, game.getId());
         }
 
         return new PlayResponseDto(

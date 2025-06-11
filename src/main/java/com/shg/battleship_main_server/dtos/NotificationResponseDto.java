@@ -2,5 +2,9 @@ package com.shg.battleship_main_server.dtos;
 
 import com.shg.battleship_main_server.enums.Notification;
 
-public record NotificationResponseDto(Notification notification) {
+import java.util.UUID;
+
+public record NotificationResponseDto(
+        Notification notification,
+        UUID gameId) {
 }

@@ -28,13 +28,11 @@ public class GameNotificationService {
         messagingTemplate.convertAndSend("/topics/game-started/" + playerId, new GameResponseDto(gameId));
     }
 
-    public void notifyInGameChanges(UUID playerId, Notification notification){
-        System.out.println(notification);
-        messagingTemplate.convertAndSend("/topics/game-notify/" + playerId, new NotificationResponseDto(notification));
+    public void notifyInGameChanges(UUID playerId, Notification notification, UUID gameId){
+        messagingTemplate.convertAndSend("/topics/game-notify/" + playerId, new NotificationResponseDto(notification, gameId));
     }
 
     public void notifyRescueGame(UUID playerId, BoardRescueResponseDto response){
-        System.out.println(response);
         messagingTemplate.convertAndSend("/topics/game-rescue/" + playerId, response);
     }
 }
