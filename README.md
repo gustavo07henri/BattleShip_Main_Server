@@ -3,7 +3,7 @@
 
 Backend do projeto **BattleShip**, um jogo de Batalha Naval multiplayer, desenvolvido como parte da disciplina de Sistemas Distribuídos e Mobile (SDM). Este servidor contém toda a lógica de negócio, persistência de dados e gerenciamento completo das partidas.
 
-## 🛠 Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 - **Java**
 - **Spring Framework**
@@ -12,7 +12,7 @@ Backend do projeto **BattleShip**, um jogo de Batalha Naval multiplayer, desenvo
 - **WebSocket (STOMP)**
 - **JPA / Persistência de dados**
 
-## 🎯 Funcionalidades
+##  Funcionalidades
 
 - Gerenciamento completo das partidas de Batalha Naval.
 - Persistência de dados e recuperação de partidas.
@@ -20,7 +20,7 @@ Backend do projeto **BattleShip**, um jogo de Batalha Naval multiplayer, desenvo
 - API RESTful para integração com o cliente frontend.
 - Controle de estados, jogadas e lógica de negócio das partidas.
 
-## 🚀 Instalação e Execução
+##  Instalação e Execução
 
 Para executar o projeto localmente:
 
@@ -46,12 +46,12 @@ Para utilização completa do sistema, recomenda-se utilizar o cliente frontend 
 
 [BattleShip Client - GitHub](https://github.com/gustavo07henri/battleship_client)
 
-## 📦 Pré-requisitos
+##  Pré-requisitos
 
 - Java 17+
 - Maven
 
-## 💼 Sobre o Projeto
+##  Sobre o Projeto
 
 O **BattleShip Server** foi desenvolvido como parte do portfólio acadêmico, com foco em:
 
@@ -60,7 +60,7 @@ O **BattleShip Server** foi desenvolvido como parte do portfólio acadêmico, co
 - Arquitetura backend orientada a serviços
 - Desenvolvimento full stack com integração de múltiplos protocolos
 
-## 👨‍💻 Autor
+##  Autor
 
 **Gustavo Henrique**
 
