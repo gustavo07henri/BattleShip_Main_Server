@@ -39,4 +39,10 @@ public class RestGameController {
         gameRecoveryService.recovery(data);
         return ResponseEntity.ok().body("");
     }
+
+    @PostMapping("/refresh-game")
+    public ResponseEntity<String> refreshGame(@RequestBody RefreshRequestDto data){
+        gameRecoveryService.refreshGame(data);
+        return ResponseEntity.ok().body("");
+    }
 }

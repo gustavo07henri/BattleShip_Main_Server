@@ -3,14 +3,19 @@ package com.shg.battleship_main_server.repositorys;
 import com.shg.battleship_main_server.entitys.Game;
 import com.shg.battleship_main_server.entitys.Player;
 import com.shg.battleship_main_server.enums.GameStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface GameRepository extends JpaRepository<Game, UUID> {
+    @EntityGraph(attributePaths = {"boards"})
+    Optional<Game> findById(UUID id);
+    
     @Query("SELECT COUNT(g) > 0 FROM Game g " +
             "WHERE (g.player1 = :player OR g.player2 = :player) " +
             "AND g.gameStatus IN (:statuses)")
@@ -30,5 +35,18 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
     );
 
     Game findByGameStatus(GameStatus gameStatus);
+
+    void deleteGameById(UUID id);
+
+    @Query("""
+    SELECT g FROM Game g
+    WHERE g.gameStatus = :status
+      AND (g.boards IS EMPTY OR size(g.boards) = 1)
+      AND g.player1 = :player OR g.player2 = :player
+""")
+    List<Game> findGamesToDelete(
+            @Param("status") GameStatus status,
+            @Param("player") Player player
+    );
 
 }

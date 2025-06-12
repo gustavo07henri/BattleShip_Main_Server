@@ -35,6 +35,9 @@ public class  GameService{
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
 
+//        List<Game> games = gameRepository.findGamesToDelete(GameStatus.IN_PROGRESS, player);
+//        gameRepository.deleteAll(games);
+
         if (gameRepository.isPlayerInActiveGame(player, List.of(GameStatus.WAITING, GameStatus.IN_PROGRESS))) {
             throw new PlayerAlreadyInGameException("Jogador já está em um jogo ativo");
         }
@@ -46,7 +49,7 @@ public class  GameService{
         }
 
 
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = System.currentTimeMillis();
 
         Game newGame = new Game();
         newGame.setGameStatus(GameStatus.WAITING);
@@ -82,17 +85,21 @@ public class  GameService{
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer1().getId(), game.getId());
         gameNotificationService.notifyPlayerGameStarted(game.getPlayer2().getId(), game.getId());
 
-        gameNotificationService.notifyInGameChanges(game.getPlayer1().getId(), Notification.YOUR_TURN, gameId);
-        gameNotificationService.notifyInGameChanges(game.getPlayer2().getId(), Notification.NOT_YOU_TURN, gameId);
-
         return gameRepository.save(game);
     }
-
+    @Transactional
     public BoardResponseDto setBoard(List<RequestShipDto> data, UUID gameId, UUID playerId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
+
+        Player opponent = player.equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1();
+
+        Player currentPlayer = game.getCurrentPlayer();
+        Player anotherPlayer = currentPlayer.getId().equals(game.getPlayer1().getId()) ? game.getPlayer2() : game.getPlayer1();
+        gameNotificationService.notifyInGameChanges(currentPlayer.getId(), Notification.YOUR_TURN, game.getId());
+        gameNotificationService.notifyInGameChanges(anotherPlayer.getId(), Notification.NOT_YOU_TURN, game.getId());
 
         if(!player.equals(game.getPlayer1()) && !player.equals(game.getPlayer2())){
             throw new IllegalStateException("Jogador não pertence a partida");
@@ -134,8 +141,23 @@ public class  GameService{
         board.setShips(ships);
         board.setShipPositions(shipPositions);
         board.setAttacksReceived(new HashSet<>());
+        if (game.getBoards() == null) {
+            game.setBoards(new HashSet<>());
+        }
+        game.getBoards().add(board);
 
         boardRepository.save(board);
+        gameRepository.save(game);
+
+        Set<Board> boards = boardRepository.findByGame(game);
+
+        if(boards.size() == 1){
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.WAITING_OTHER_PLAYER, gameId);
+        }
+        if(boards.size() == 2){
+            gameNotificationService.notifyInGameChanges(player.getId(), Notification.RESUMED, gameId);
+            gameNotificationService.notifyInGameChanges(opponent.getId(), Notification.RESUMED, gameId);
+        }
 
         return  new BoardResponseDto(
                 board.getPlayer().getId(),

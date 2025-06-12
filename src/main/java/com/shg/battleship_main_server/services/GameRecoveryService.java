@@ -66,12 +66,25 @@ public class GameRecoveryService {
                     .map(ShipPosition::getPosition)
                     .collect(Collectors.toSet());
 
+            Notification notification = game.getCurrentPlayer().getId().equals(player.getId()) ? Notification.YOUR_TURN : Notification.NOT_YOU_TURN;
+            gameNotificationService.notifyInGameChanges(player.getId(), notification, null);
             gameNotificationService.notifyRescueGame(player.getId(), new BoardRescueResponseDto(playResponseDtos, shipPositionsSet));
 
         }catch (Exception e){
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public void refreshGame(RefreshRequestDto data){
+        Game game = gameRepository.findById(data.gameId())
+                .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado"));
+
+        Player player = playerRepository.findById(data.playerId())
+                .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
+
+
+        rescuePlaysGame(game, player);
     }
 
     public synchronized void recovery(GameRescueRequestDto data){
@@ -126,7 +139,7 @@ public class GameRecoveryService {
             executor.schedule(()->{
                 rescuePlaysGame(game, game.getPlayer1());
                 rescuePlaysGame(game, game.getPlayer2());
-            }, 2, TimeUnit.SECONDS);
+            }, 1, TimeUnit.SECONDS);
             return;
         }
 
@@ -137,6 +150,7 @@ public class GameRecoveryService {
         gameRepository.findById(gameId).ifPresent(game -> {
             game.setGameStatus(GameStatus.CANCELED);
             gameRepository.save(game);
+            gameRepository.deleteGameById(game.getId());
             gameNotificationService.notifyInGameChanges(playerId, Notification.CANCELLED, gameId);
         });
     }

@@ -25,6 +25,7 @@ public class GameNotificationService {
      * @param gameId
      */
     public void notifyPlayerGameStarted(UUID playerId, UUID gameId){
+        System.out.println(new GameResponseDto(gameId));
         messagingTemplate.convertAndSend("/topics/game-started/" + playerId, new GameResponseDto(gameId));
     }
 
