@@ -40,7 +40,7 @@ mvn spring-boot:run
 
 O servidor backend não possui interface gráfica. A interação com o sistema é realizada via API e WebSocket.
 
-## 🔗 Frontend Recomendado
+##  Frontend Recomendado
 
 Para utilização completa do sistema, recomenda-se utilizar o cliente frontend disponível em:
 
