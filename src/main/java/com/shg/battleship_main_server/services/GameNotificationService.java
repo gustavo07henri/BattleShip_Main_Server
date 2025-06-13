@@ -3,13 +3,11 @@ package com.shg.battleship_main_server.services;
 import com.shg.battleship_main_server.dtos.BoardRescueResponseDto;
 import com.shg.battleship_main_server.dtos.GameResponseDto;
 import com.shg.battleship_main_server.dtos.NotificationResponseDto;
-import com.shg.battleship_main_server.dtos.PlayResponseDto;
 import com.shg.battleship_main_server.enums.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 

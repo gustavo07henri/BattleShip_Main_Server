@@ -41,12 +41,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> PlayerAlreadyInGameHandle(PlayerAlreadyInGameException ex){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+    @ExceptionHandler(PlayerAlreadyWaitingGameException.class)
+    public ResponseEntity<String> PlayerAlreadyWaitingGameHandle(PlayerAlreadyWaitingGameException ex){
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
+    }
 
-    /**
-     *
-     * @param ex
-     * @return ErrorMessage in case of requisition bad success
-     */
     @MessageExceptionHandler(GameNotFoundException.class)
     @SendToUser("/queue/errors")
     public ErrorMessage handleGameNotFound(GameNotFoundException ex) {

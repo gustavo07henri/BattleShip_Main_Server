@@ -4,7 +4,6 @@ import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.*;
 import com.shg.battleship_main_server.enums.GameStatus;
 import com.shg.battleship_main_server.enums.Notification;
-import com.shg.battleship_main_server.enums.PlayResult;
 import com.shg.battleship_main_server.enums.PlayerStatusForRescue;
 import com.shg.battleship_main_server.exceptions.GameNotFoundException;
 import com.shg.battleship_main_server.exceptions.RecoverySessionException;
@@ -87,21 +86,31 @@ public class GameRecoveryService {
         rescuePlaysGame(game, player);
     }
 
-    public synchronized void recovery(GameRescueRequestDto data){
+    public synchronized void handleRecovery(GameRescueRequestDto data, GameStatus status) {
         Player player = playerRepository.findById(data.playerId())
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
 
-        Game game = gameRepository.findFirstByPlayersAndGameStatus(player, player, GameStatus.IN_PROGRESS);
+        Game game = gameRepository.findFirstByPlayersAndGameStatus(player, player, status);
 
-        if(data.statusForRescue() == null){
+        if (data.statusForRescue() == null) {
             throw new IllegalArgumentException("Confirmação inválida");
         }
 
         boolean confirm = data.statusForRescue().equals(PlayerStatusForRescue.YES);
 
-        startRecovery(game.getId(), player.getId());
-        confirmRecovery(game.getId(), player.getId(), confirm);
-
+        if (status == GameStatus.IN_PROGRESS) {
+            startRecovery(game.getId(), player.getId());
+            confirmRecovery(game.getId(), player.getId(), confirm);
+        } else if (status == GameStatus.WAITING) {
+            if (confirm) {
+                gameNotificationService.notifyInGameChanges(player.getId(), Notification.WAITING_OTHER_PLAYER, null);
+            } else {
+                gameNotificationService.notifyInGameChanges(player.getId(), Notification.CANCELLED, null);
+                gameRepository.delete(game);
+            }
+        } else {
+            throw new IllegalArgumentException("Status de jogo não suportado");
+        }
     }
 
     public synchronized void startRecovery(UUID gameId, UUID playerId){

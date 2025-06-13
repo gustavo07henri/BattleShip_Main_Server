@@ -2,6 +2,7 @@ package com.shg.battleship_main_server.controllers;
 
 import com.shg.battleship_main_server.dtos.*;
 import com.shg.battleship_main_server.entitys.Game;
+import com.shg.battleship_main_server.enums.GameStatus;
 import com.shg.battleship_main_server.services.GameRecoveryService;
 import com.shg.battleship_main_server.services.GameService;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,13 @@ public class RestGameController {
 
     @PostMapping("/rescue-game")
     public ResponseEntity<String> rescueGame(@RequestBody GameRescueRequestDto data){
-        gameRecoveryService.recovery(data);
+        gameRecoveryService.handleRecovery(data, GameStatus.IN_PROGRESS);
+        return ResponseEntity.ok().body("");
+    }
+
+    @PostMapping("/waiting-handle-game")
+    public ResponseEntity<String> waitingHandle(@RequestBody GameRescueRequestDto data){
+        gameRecoveryService.handleRecovery(data, GameStatus.WAITING);
         return ResponseEntity.ok().body("");
     }
 

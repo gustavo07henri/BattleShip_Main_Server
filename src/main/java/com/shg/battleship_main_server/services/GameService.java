@@ -35,13 +35,12 @@ public class  GameService{
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Jogador não encontrado"));
 
-//        List<Game> games = gameRepository.findGamesToDelete(GameStatus.IN_PROGRESS, player);
-//        gameRepository.deleteAll(games);
-
-        if (gameRepository.isPlayerInActiveGame(player, List.of(GameStatus.WAITING, GameStatus.IN_PROGRESS))) {
+        if (gameRepository.isPlayerInActiveGame(player, List.of(GameStatus.IN_PROGRESS))) {
             throw new PlayerAlreadyInGameException("Jogador já está em um jogo ativo");
         }
-
+        if (gameRepository.isPlayerInActiveGame(player, List.of(GameStatus.WAITING))) {
+            throw new PlayerAlreadyWaitingGameException("Você já esta buscando jogo");
+        }
 
         Game game = gameRepository.findByGameStatus(GameStatus.WAITING);
         if (game != null && !game.getPlayer1().equals(player)) {

@@ -37,16 +37,4 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
     Game findByGameStatus(GameStatus gameStatus);
 
     void deleteGameById(UUID id);
-
-    @Query("""
-    SELECT g FROM Game g
-    WHERE g.gameStatus = :status
-      AND (g.boards IS EMPTY OR size(g.boards) = 1)
-      AND g.player1 = :player OR g.player2 = :player
-""")
-    List<Game> findGamesToDelete(
-            @Param("status") GameStatus status,
-            @Param("player") Player player
-    );
-
 }
